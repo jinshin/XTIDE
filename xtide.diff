@@ -148,14 +148,11 @@ diff -ur trunk/XTIDE_Universal_BIOS/makefile xtide625/XTIDE_Universal_BIOS/makef
  
 diff -ur trunk/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm xtide625/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm
 --- trunk/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm	2023-09-07 13:12:29.270509700 +0300
-+++ xtide625/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm	2023-09-06 21:00:08.334868200 +0300
-@@ -37,6 +37,28 @@
++++ xtide625/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm	2023-09-07 13:24:22.159803200 +0300
+@@ -37,6 +37,25 @@
  	sti									; Enable interrupts for keystrokes
  	push	ds
  	push	ax							; We use AX to install very late init handler
-+	push	cx
-+	push	dx
-+
 +;Add exit if CPU unsupported
 +;For now we don't care for anything more than V20
 +;Code from CH37x, decide the CPU
@@ -178,14 +175,12 @@ diff -ur trunk/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm xtide625/X
  	LOAD_BDA_SEGMENT_TO	ds, ax
  
  	test	BYTE [BDA.bKBFlgs1], (1<<2)	; Clears ZF if CTRL is held down
-@@ -59,8 +81,10 @@
+@@ -59,8 +78,8 @@
  %endif
  
  .SkipRomInitialization:
 -	pop		ax
 -	pop		ds
-+	pop	dx
-+	pop	cx
 +	pop	ax
 +	pop	ds
  	popf
