@@ -1,0 +1,193 @@
+Binary files trunk/.svn/wc.db and xtide625/.svn/wc.db differ
+diff -ur trunk/XTIDE_Universal_BIOS/makefile xtide625/XTIDE_Universal_BIOS/makefile
+--- trunk/XTIDE_Universal_BIOS/makefile	2023-09-07 13:12:40.155028000 +0300
++++ xtide625/XTIDE_Universal_BIOS/makefile	2023-09-06 20:22:10.141875400 +0300
+@@ -2,13 +2,13 @@
+ # Makefile to build XTIDE Universal BIOS.                                                          #
+ #                                                                                                  #
+ # Valid makefile targets are:                                                                      #
+-# all       Removes existing files and builds binary files in \Build (without checksums)           #
++# all       Removes existing files and builds binary files in /Build (without checksums)           #
+ # small     Builds only binaries smaller than or equal to 8 kiB (without checksums)                #
+ # large     Builds only binaries larger than 8 kiB (without checksums)                             #
+ # custom    Builds custom binary without checksum (change DEFINES_CUSTOM / BIOS_SIZE_CUSTOM first) #
+-# clean     Removes all files from \Build                                                          #
++# clean     Removes all files from /Build                                                          #
+ # checksum* Same as 'all' but also applies checksums to the binaries                               #
+-# strings*  Compress src\Strings.asm to src\StringsCompressed.asm                                  #
++# strings*  Compress src/Strings.asm to src/StringsCompressed.asm                                  #
+ # unused*   Checks if there are any unused functions that can be removed to save space             #
+ #                                                                                                  #
+ # * at the end of target name means that Perl is required for the job.                             #
+@@ -168,13 +168,13 @@
+ #########################
+ 
+ # Make
+-MAKE = mingw32-make.exe
++MAKE = make
+ 
+ # Assembler
+-AS = nasm.exe
++AS = nasm
+ 
+ # use this command to erase files.
+-RM = -del /Q
++RM = rm -f
+ 
+ 
+ #############################
+@@ -195,7 +195,10 @@
+ all: clean small large
+ 	@echo All done!
+ 
+-small: xt_tiny xt xtplus at 386 ps2
++#small: xt_tiny xt xtplus at 386 ps2
++#	@echo All small binaries built!
++
++small: xt xtplus
+ 	@echo All small binaries built!
+ 
+ large: xt_large xtplus_large at_large 386_large ps2_large
+@@ -249,71 +252,71 @@
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_CUSTOM) -l"$(TARGET)_cstm.lst" -o"$(TARGET)_cstm.bin"
+ 	@echo * Custom version "$(TARGET)_cstm.bin" built.
+ 
+-strings: src\Strings.asm
+-	@$(AS) src\Strings.asm $(ASFLAGS) $(DEFS_AT_LARGE) -DCHECK_FOR_UNUSED_ENTRYPOINTS -DMODULE_STRINGS_COMPRESSED_PRECOMPRESS -o build\Strings.bin -l build\StringsPrecompress.lst
+-	@perl ..\Tools\StringsCompress.pl < build\StringsPrecompress.lst > src\StringsCompressed.asm
++strings: src/Strings.asm
++	@$(AS) src/Strings.asm $(ASFLAGS) $(DEFS_AT_LARGE) -DCHECK_FOR_UNUSED_ENTRYPOINTS -DMODULE_STRINGS_COMPRESSED_PRECOMPRESS -o build/Strings.bin -l build/StringsPrecompress.lst
++	@perl ../Tools/StringsCompress.pl < build/StringsPrecompress.lst > src/StringsCompressed.asm
+ 	@echo StringsCompressed.asm updated!
+ 
+ clean:
+-	@$(RM) $(BUILD_DIR)\*.*
++	@$(RM) $(BUILD_DIR)/*.*
+ 	@echo Deleted "(*.*)" from "$(BUILD_DIR)/"
+ 
+ checksum: all
+-	@perl ..\Tools\checksum.pl $(TARGET)_tiny.bin $(BIOS_SIZE_TINY)
+-	@perl ..\Tools\checksum.pl $(TARGET)_xt.bin $(BIOS_SIZE_SMALL)
+-	@perl ..\Tools\checksum.pl $(TARGET)_xtp.bin $(BIOS_SIZE_SMALL)
+-	@perl ..\Tools\checksum.pl $(TARGET)_at.bin $(BIOS_SIZE_SMALL)
+-	@perl ..\Tools\checksum.pl $(TARGET)_386.bin $(BIOS_SIZE_SMALL)
+-	@perl ..\Tools\checksum.pl $(TARGET)_ps2.bin $(BIOS_SIZE_SMALL)
+-	@perl ..\Tools\checksum.pl $(TARGET)_xtl.bin $(BIOS_SIZE_LARGE)
+-	@perl ..\Tools\checksum.pl $(TARGET)_xtpl.bin $(BIOS_SIZE_LARGE)
+-	@perl ..\Tools\checksum.pl $(TARGET)_atl.bin $(BIOS_SIZE_LARGE)
+-	@perl ..\Tools\checksum.pl $(TARGET)_386l.bin $(BIOS_SIZE_LARGE)
+-	@perl ..\Tools\checksum.pl $(TARGET)_ps2l.bin $(BIOS_SIZE_LARGE)
++	@perl ../Tools/checksum.pl $(TARGET)_tiny.bin $(BIOS_SIZE_TINY)
++	@perl ../Tools/checksum.pl $(TARGET)_xt.bin $(BIOS_SIZE_SMALL)
++	@perl ../Tools/checksum.pl $(TARGET)_xtp.bin $(BIOS_SIZE_SMALL)
++	@perl ../Tools/checksum.pl $(TARGET)_at.bin $(BIOS_SIZE_SMALL)
++	@perl ../Tools/checksum.pl $(TARGET)_386.bin $(BIOS_SIZE_SMALL)
++	@perl ../Tools/checksum.pl $(TARGET)_ps2.bin $(BIOS_SIZE_SMALL)
++	@perl ../Tools/checksum.pl $(TARGET)_xtl.bin $(BIOS_SIZE_LARGE)
++	@perl ../Tools/checksum.pl $(TARGET)_xtpl.bin $(BIOS_SIZE_LARGE)
++	@perl ../Tools/checksum.pl $(TARGET)_atl.bin $(BIOS_SIZE_LARGE)
++	@perl ../Tools/checksum.pl $(TARGET)_386l.bin $(BIOS_SIZE_LARGE)
++	@perl ../Tools/checksum.pl $(TARGET)_ps2l.bin $(BIOS_SIZE_LARGE)
+ 
+ unused:
+ 	@echo "XT Tiny"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT_TINY) -o"$(TARGET)_unused_tiny.asm" -l"$(TARGET)_unused_tiny.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT_TINY) -o"$(TARGET)_unused_tiny.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_tiny.lst $(TARGET)_unused_tiny.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_tiny.lst $(TARGET)_unused_tiny.asm
+ 	@echo "XT Small"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT) -o"$(TARGET)_unused_xt.asm" -l"$(TARGET)_unused_xt.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT) -o"$(TARGET)_unused_xt.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_xt.lst $(TARGET)_unused_xt.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_xt.lst $(TARGET)_unused_xt.asm
+ 	@echo "XT Large"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT_LARGE) -o"$(TARGET)_unused_xtl.asm" -l"$(TARGET)_unused_xtl.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XT_LARGE) -o"$(TARGET)_unused_xtl.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_xtl.lst $(TARGET)_unused_xtl.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_xtl.lst $(TARGET)_unused_xtl.asm
+ 	@echo "XT Plus Small"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XTPLUS) -o"$(TARGET)_unused_xtp.asm" -l"$(TARGET)_unused_xtp.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XTPLUS) -o"$(TARGET)_unused_xtp.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_xtp.lst $(TARGET)_unused_xtp.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_xtp.lst $(TARGET)_unused_xtp.asm
+ 	@echo "XT Plus Large"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XTPLUS_LARGE) -o"$(TARGET)_unused_xtpl.asm" -l"$(TARGET)_unused_xtpl.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_XTPLUS_LARGE) -o"$(TARGET)_unused_xtpl.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_xtpl.lst $(TARGET)_unused_xtpl.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_xtpl.lst $(TARGET)_unused_xtpl.asm
+ 	@echo "AT Small"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_AT) -o"$(TARGET)_unused_at.asm" -l"$(TARGET)_unused_at.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_AT) -o"$(TARGET)_unused_at.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_at.lst $(TARGET)_unused_at.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_at.lst $(TARGET)_unused_at.asm
+ 	@echo "AT Large"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_AT_LARGE) -o"$(TARGET)_unused_atl.asm" -l"$(TARGET)_unused_atl.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_AT_LARGE) -o"$(TARGET)_unused_atl.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_atl.lst $(TARGET)_unused_atl.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_atl.lst $(TARGET)_unused_atl.asm
+ 	@echo "386 Small"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_386) -o"$(TARGET)_unused_386.asm" -l"$(TARGET)_unused_386.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_386) -o"$(TARGET)_unused_386.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_386.lst $(TARGET)_unused_386.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_386.lst $(TARGET)_unused_386.asm
+ 	@echo "386 Large"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_386_LARGE) -o"$(TARGET)_unused_386l.asm" -l"$(TARGET)_unused_386l.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_386_LARGE) -o"$(TARGET)_unused_386l.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_386l.lst $(TARGET)_unused_386l.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_386l.lst $(TARGET)_unused_386l.asm
+ 	@echo "PS/2 Small"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_PS2) -o"$(TARGET)_unused_ps2.asm" -l"$(TARGET)_unused_ps2.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_PS2) -o"$(TARGET)_unused_ps2.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_ps2.lst $(TARGET)_unused_ps2.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_ps2.lst $(TARGET)_unused_ps2.asm
+ 	@echo "PS/2 Large"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_PS2_LARGE) -o"$(TARGET)_unused_ps2l.asm" -l"$(TARGET)_unused_ps2l.lst"
+ 	@$(AS) "$(SRC_ASM)" $(ASFLAGS) $(DEFS_PS2_LARGE) -o"$(TARGET)_unused_ps2l.asm" -E -DCHECK_FOR_UNUSED_ENTRYPOINTS
+-	@perl ..\Tools\unused.pl $(TARGET)_unused_ps2l.lst $(TARGET)_unused_ps2l.asm
++	@perl ../Tools/unused.pl $(TARGET)_unused_ps2l.lst $(TARGET)_unused_ps2l.asm
+ 
+diff -ur trunk/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm xtide625/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm
+--- trunk/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm	2023-09-07 13:12:29.270509700 +0300
++++ xtide625/XTIDE_Universal_BIOS/Src/Initialization/Initialize.asm	2023-09-06 21:00:08.334868200 +0300
+@@ -37,6 +37,28 @@
+ 	sti									; Enable interrupts for keystrokes
+ 	push	ds
+ 	push	ax							; We use AX to install very late init handler
++	push	cx
++	push	dx
++
++;Add exit if CPU unsupported
++;For now we don't care for anything more than V20
++;Code from CH37x, decide the CPU
++;V20
++%ifdef USE_186
++	xor	al,al
++	mov	al,40h
++	mul	al
++	jnz	.SkipRomInitialization
++%endif
++;8088
++%ifndef USE_186
++	xor	al,al
++	mov	al,40h
++	mul	al
++	jz	.SkipRomInitialization
++%endif
++
++
+ 	LOAD_BDA_SEGMENT_TO	ds, ax
+ 
+ 	test	BYTE [BDA.bKBFlgs1], (1<<2)	; Clears ZF if CTRL is held down
+@@ -59,8 +81,10 @@
+ %endif
+ 
+ .SkipRomInitialization:
+-	pop		ax
+-	pop		ds
++	pop	dx
++	pop	cx
++	pop	ax
++	pop	ds
+ 	popf
+ 	retf
+ 
